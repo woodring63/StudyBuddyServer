@@ -12,7 +12,7 @@ var Session = require('./models/session');
 var app = express();
 
 // connect to db
-mongoose.connect('mongodb://localhost/studybuddy');
+//mongoose.connect('mongodb://localhost/studybuddy');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
