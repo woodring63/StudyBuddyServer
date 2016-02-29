@@ -10,6 +10,7 @@ var userSchema = new Schema({
     name: String,
     username: {type: String, required: true, unique: true},
     courses: Array,
+    major: String,
     buddies: Array, //stored as IDs
     sessions: Array,
     createdSessions: Array

@@ -22,6 +22,7 @@ router.get('/name/:name?', function(req, res) {
 			} else {
 				//User should be a JSON document
 				var json = {users : user};
+
 				console.log(user);
 				res.json(json);//Otherwise this was send
 			}
@@ -46,6 +47,25 @@ router.get('/id/:id?', function(req, res) {
 		});
 });
 
+router.get('/buddies/:id?', function(req, res) {
+
+	users.findById(req.params.id)
+		.exec(function(err,user){
+			if(err){
+				console.log(err);
+				res.status(500).json({status: 'failure'});
+			} else {
+				//User should be a JSON document
+				users.find({ _id : {$in : user.buddies} }, function(err, buddyarr) {
+					if(err) res.status(500).json({status: 'failure'});
+
+					var json = {buddies : buddyarr};
+
+				});//Otherwise this was send
+				res.json(json);
+			}
+		});
+});
 
 /* POST users  */
 
