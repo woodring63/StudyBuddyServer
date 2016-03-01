@@ -2,12 +2,11 @@ var mongoose = require('mongoose');
 
 var sessions = mongoose.Schema({
 	title: String,
-	startTime: String,
-	endTime: String,
+	startTime: Number,
+	endTime: Number,
 	attendees: Array,
 	messages: Array,
-	course: String,
-	date: String
+	course: String
 });
 
 module.exports = mongoose.model('Session', sessions);

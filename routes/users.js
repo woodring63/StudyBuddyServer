@@ -30,6 +30,56 @@ router.get('/name/:name', function(req, res) {
 		});
 });
 
+/* GET info of the user with this username*/
+router.get('/username/:username', function(req, res) {
+
+	users.findOne({username : req.params.username})
+		.exec(function(err,user){
+			if(err){
+				console.log(err);
+				res.status(500).json({status: 'failure'});
+			} else {
+				//User should be a JSON document
+				var json = {user : user};
+				console.log(user);
+
+				//Also return all sessions will occur with the users classes in the next 24 hours
+				sessions.find(
+					({$and : [{course : user.courses },
+						{startTime : {$gte : new Date().getTime(), $lte : new Date().getTime() + 86400000}}]}))
+					.exec(function(err,newsessions){
+						if (err)
+						{
+							res.status(500).json({status: 'failure'});
+						}
+						else
+						{
+							json.newSessions = newsessions;
+							console.log(newsessions);
+							console.log(json);
+							//Also find info on all the users sessions
+							sessions.find({ _id : {$in : user.sessions}})
+								.exec(function(err,joinedSessions)
+								{
+									if(err)
+									{
+										res.status(500).json({status: 'failure'});
+									}else
+									{
+										json.joinedSessions = joinedSessions;
+										console.log(json);
+										res.json(json);
+									}
+
+								});
+						}
+					});
+
+			}
+		});
+});
+
+/* GET info of the user with the given id */
 //Returns a specific user by searching for their info with their id
 //Will be used to get a friend's info or their info
 router.get('/id/:id', function(req, res) {
@@ -69,7 +119,7 @@ router.get('/buddies/:id', function(req, res) {
 						res.json(json);
 					}
 
-				});//Otherwise this was send
+				});
 
 		}
 		});
@@ -269,7 +319,6 @@ router.put('/setmajor/:id/:major', function(req, res) {
 });
 
 
-//*******LAST TWO ARE UNTESTED*******************************
 
 /* PUT remove sessions from their list  */
 //unjoin a session
@@ -283,7 +332,18 @@ router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 				res.status(500).json({status: 'failure'});
 			}
 			else {
-				res.status(200).json({status: 'success'});
+				sessions.update(
+					{ _id: req.params.sessionid },
+					{ $pull: { attendees : req.params.id } },
+					{ safe: true },
+					function remove(err, obj) {
+						if(err) {
+							res.status(500).json({status: 'failure'});
+						}
+						else {
+							res.status(200).json({status: 'success'});
+						}
+					});
 			}
 		});
 });
@@ -301,12 +361,35 @@ router.put('/joinsession/:id/:sessionid',function(req,res) {
 		{
 			//adds user to the buddy list, then
 			user1.sessions.push(req.params.sessionid);
-			user1.save(function(err)
-			{
+			sessions.findById(req.params.sessionid, function(err,session) {
 				if(err)
+				{
 					res.status(500).json({status: 'failure'});
+				}
+				else
+				{
+					session.attendees.push(req.params.id);
+					session.save(function(err)
+					{
+						if(err)
+							res.status(500).json({status: 'failure'});
+						else
+						{
+							user1.save(function(err)
+							{
+								if(err)
+									res.status(500).json({status: 'failure'});
+								else
+								{
+									res.status(200).json({status: 'success'});
+								}
+							});
+						}
+					});
+				}
 			});
 		}
+
 	});
 });
 

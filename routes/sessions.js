@@ -25,13 +25,14 @@ router.get('/id/:id', function(req, res) {
 });
 
 /* GET sessions with filter*/           //20161118
-router.get('/:course/:startTime/:endTime/:date', function(req,res) {
+router.get('/:course/:startTime/:endTime', function(req,res) {
     //Checks which fields are filled out and then constructs an object to search for based off
     //these parameters
     var arr = [];
     if(req.params.course != '0')
     {
-        arr.push({course : req.params.course});
+        var str = req.params.course;
+        arr.push({course : str.slice(0,str.length - 3) + ' ' + str.slice(str.length - 3)});
     }
     if(req.params.startTime != '0')
     {
