@@ -1,6 +1,7 @@
 /**
  * Created by enclark on 2/29/2016.
  */
+var express = require('express');
 var router = express.Router();
 var sessions = require('../models/session');
 var mongoose = require('mongoose');
@@ -30,27 +31,31 @@ router.get('/:course/:startTime/:endTime/:date', function(req,res) {
     var arr = [];
     if(req.params.course != '0')
     {
-        push.apply(arr, [{course : req.params.course}]);
+        arr.push({course : req.params.course});
     }
     if(req.params.startTime != '0')
     {
-        push.apply(arr, [{startTime : {$gte : req.params.startTime}}]);
+        arr.push({startTime : {$gte : req.params.startTime}});
     }
     if(req.params.endTime != '0')
     {
-        push.apply(arr, [{endTime : {$lte : req.params.endTime}}]);
+        arr.push({endTime : {$lte : req.params.endTime}});
     }
     if(req.params.date != '0')
     {
-        push.apply(arr, [{date : req.params.date}]);
+        arr.push({date : req.params.date});
     }
 
-    users.find({ $add : arr }, function(err, array) {
-        if(err) res.status(500).json({status: 'failure'});
+    console.log(arr);
+    sessions.find({ $and : arr }, function(err, array) {
+        if(err) {
+            res.status(500).json({status: 'failure'})}
+        else{
+            var json = {sessions : array};
+            console.log(json);
+            res.json(json);
+        }
 
-        var json = {sessions : array};
-        console.log(json);
-        res.json(json);
     });//Otherwise this was send
 
 });
@@ -62,6 +67,7 @@ router.get('/:course/:startTime/:endTime/:date', function(req,res) {
 router.post('/newsession', function(req, res) {
     //If more info than necessary is given, it will indiscriminately
     //stored in the database
+    console.log("Entered");
     var record = new sessions(req.body);
     record.save(function(err){
         if(err) {
@@ -74,4 +80,4 @@ router.post('/newsession', function(req, res) {
     });
 });
 
-
+module.exports = router;

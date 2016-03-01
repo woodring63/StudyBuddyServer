@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var users = require('../models/users');
 var mongoose = require('mongoose');
-var sessions = require('/models/session'); //Not tested
+var sessions = require('../models/session'); //Not tested
 //mongoose.connect('mongodb://localhost:3000');
 
 
@@ -59,12 +59,16 @@ router.get('/buddies/:id', function(req, res) {
 			} else {
 				//User should be a JSON document
 				users.find({ _id : {$in : user.buddies} }, function(err, buddyarr) {
-					if(err) res.status(500).json({status: 'failure'});
+					if(err)
+					{
+						res.status(500).json({status: 'failure'});
+					}else
+					{
+						json = {buddies : buddyarr};
+						console.log(json);
+						res.json(json);
+					}
 
-
-					 json = {buddies : buddyarr};
-					console.log(json);
-					res.json(json);
 				});//Otherwise this was send
 
 		}
@@ -98,28 +102,45 @@ router.post('/newuser', function(req, res) {
 router.put('/updatefriends/:id/:id2',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.status(500).json({status: 'failure'});
-
-		//adds user to the buddy list, then
-		user1.buddies.push(req.params.id2);
-		user1.save(function(err)
+		if(err) {
+			res.status(500).json({status: 'failure'});
+		}
+		else
 		{
-			if(err) res.status(500).json({status: 'failure'});
-		});
+			//adds user to the buddy list, then
+			user1.buddies.push(req.params.id2);
+			user1.save(function(err)
+			{
+				if(err)
+				{
+					res.status(500).json({status: 'failure'});
+				}
+			});
+			//Now for the second user
+			users.findById(req.params.id2, function(err, user2)
+			{
+				if(err) {
+					res.status(500).json({status: 'failure'});
+				}else
+				{
+					user2.buddies.push(req.params.id);
+					user2.save(function(err)
+					{
+						if(err) {
+							res.status(500).json({status: 'failure'});
+						}else
+						{
+							res.status(200).json({status: 'success'});
+						}
+
+
+					});
+				}
+			});
+		}
 
 	});
-		users.findById(req.params.id2, function(err, user2)
-		{
-			if(err) res.status(500).json({status: 'failure'});
 
-			user2.buddies.push(req.params.id);
-			user2.save(function(err)
-			{
-				if(err) res.status(500).json({status: 'failure'});
-				res.status(200).json({status: 'success'});
-
-			});
-		});
 });
 
 /* PUT remove courses from their list  */
@@ -132,8 +153,13 @@ router.put('/deletecourses/:id',function(req,res) {
 		{ $pullAll: { courses : courses } },
 		{ safe: true },
 		function remove(err, obj) {
-			if(err) res.status(500).json({status: 'failure'});
-			res.status(200).json({status: 'success'});
+			if(err)
+			{
+				res.status(500).json({status: 'failure'});
+			}else
+			{
+				res.status(200).json({status: 'success'});
+			}
 		});
 
 
@@ -163,19 +189,29 @@ router.put('/addcourses/:id', function(req, res) {
 	//this should be an array
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.status(500).json({status: 'failure'});
-		//Adds each course to the user
-		for(var i = 0; i < courses.length; i += 1)
+		if(err)
 		{
-			user1.courses.push(courses[i]);//May want to optimize this
-		}
+			res.status(500).json({status: 'failure'});
+		}else
+		{
+			//Adds each course to the user
+			for(var i = 0; i < courses.length; i += 1)
+			{
+				user1.courses.push(courses[i]);//May want to optimize this
+			}
 
-		//Array.prototype.push.apply(user1.courses, courses);
-		user1.save(function(err)
-		{
-			if(err) res.status(500).json({status: 'failure'});;
-			res.status(200).json({status: 'success'});
-		});
+			//Array.prototype.push.apply(user1.courses, courses);
+			user1.save(function(err)
+			{
+				if(err)
+				{
+					res.status(500).json({status: 'failure'});
+				}else
+				{
+					res.status(200).json({status: 'success'});
+				}
+			});
+		}
 
 	});
 });
@@ -185,15 +221,23 @@ router.put('/setcourses/:id', function(req, res) {
 
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.status(500).json({status: 'failure'});
+		if(err) {
+			res.status(500).json({status: 'failure'});
+		}
+		else
+		{		user1.courses = req.body.courses;
+			//Array.prototype.push.apply(user1.courses, courses);
+			user1.save(function(err)
+			{
+				if(err)
+				{
+					res.status(500).json({status: 'failure'});
+				}
+				else{
+					res.status(200).json({status: 'success'});
+				}
 
-		user1.courses = req.body.courses;
-		//Array.prototype.push.apply(user1.courses, courses);
-		user1.save(function(err)
-		{
-			if(err) res.status(500).json({status: 'failure'});
-			res.status(200).json({status: 'success'});
-		});
+			});}
 	});
 });
 
@@ -203,15 +247,24 @@ router.put('/setmajor/:id/:major', function(req, res) {
 
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.status(500).json({status: 'failure'});
-
-		user1.major = req.params.major;
-		//Array.prototype.push.apply(user1.courses, courses);
-		user1.save(function(err)
+		if(err)
 		{
-			if(err) res.status(500).json({status: 'failure'});
-			res.status(200).json({status: 'success'});
-		});
+			res.status(500).json({status: 'failure'});
+		}
+		else
+		{
+			user1.major = req.params.major;
+			//Array.prototype.push.apply(user1.courses, courses);
+			user1.save(function(err)
+			{
+				if(err){
+					res.status(500).json({status: 'failure'});
+				}
+				else {
+					res.status(200).json({status: 'success'});
+				}
+			});
+		}
 	});
 });
 
@@ -226,8 +279,12 @@ router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 		{ $pull: { sessions : req.params.sessionid } },
 		{ safe: true },
 		function remove(err, obj) {
-			if(err) res.status(500).json({status: 'failure'});
-			res.status(200).json({status: 'success'});
+			if(err) {
+				res.status(500).json({status: 'failure'});
+			}
+			else {
+				res.status(200).json({status: 'success'});
+			}
 		});
 });
 
@@ -237,15 +294,19 @@ router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 router.put('/joinsession/:id/:sessionid',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.status(500).json({status: 'failure'});
-
-		//adds user to the buddy list, then
-		user1.sessions.push(req.params.sessionid);
-		user1.save(function(err)
+		if(err){
+			res.status(500).json({status: 'failure'});
+		}
+		else
 		{
-			if(err) res.status(500).json({status: 'failure'});
-		});
-
+			//adds user to the buddy list, then
+			user1.sessions.push(req.params.sessionid);
+			user1.save(function(err)
+			{
+				if(err)
+					res.status(500).json({status: 'failure'});
+			});
+		}
 	});
 });
 

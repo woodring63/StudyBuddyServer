@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var Session = mongoose.Schema({
+var sessions = mongoose.Schema({
 	title: String,
 	startTime: String,
 	endTime: String,
@@ -10,5 +10,5 @@ var Session = mongoose.Schema({
 	date: String
 });
 
-module.exports = mongoose.model('Session', Session);
+module.exports = mongoose.model('Session', sessions);
 
