@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var users = require('../models/users');
 var mongoose = require('mongoose');
+var sessions = require('/models/session'); //Not tested
 //mongoose.connect('mongodb://localhost:3000');
 
 
@@ -48,7 +49,7 @@ router.get('/id/:id?', function(req, res) {
 });
 
 router.get('/buddies/:id?', function(req, res) {
-
+	var json;
 	users.findById(req.params.id)
 		.exec(function(err,user){
 			if(err){
@@ -59,11 +60,13 @@ router.get('/buddies/:id?', function(req, res) {
 				users.find({ _id : {$in : user.buddies} }, function(err, buddyarr) {
 					if(err) res.status(500).json({status: 'failure'});
 
-					var json = {buddies : buddyarr};
 
+					 json = {buddies : buddyarr};
+					console.log(json);
+					res.json(json);
 				});//Otherwise this was send
-				res.json(json);
-			}
+
+		}
 		});
 });
 
@@ -164,6 +167,25 @@ router.put('/addcourses/:id', function(req, res) {
 			user1.courses.push(courses[i]);
 		}
 
+		//Array.prototype.push.apply(user1.courses, courses);
+		user1.save(function(err)
+		{
+			if(err) res.send(err);
+			res.status(200).json({status: 'success'});
+		});
+
+	});
+});
+
+
+//Sets the major of the person
+router.put('/setmajor/:id/:major', function(req, res) {
+
+	users.findById(req.params.id, function(err, user1)
+	{
+		if(err) res.send(err);
+
+		user1.major = req.params.major;
 		//Array.prototype.push.apply(user1.courses, courses);
 		user1.save(function(err)
 		{
