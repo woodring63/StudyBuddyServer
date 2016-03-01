@@ -11,7 +11,7 @@ var sessions = require('/models/session'); //Not tested
 
 // returns a users by name
 //Searches for users
-router.get('/name/:name?', function(req, res) {
+router.get('/name/:name', function(req, res) {
 
 	console.log(req.params.name);
 	users.find({name : req.params.name})
@@ -32,7 +32,7 @@ router.get('/name/:name?', function(req, res) {
 
 //Returns a specific user by searching for their info with their id
 //Will be used to get a friend's info or their info
-router.get('/id/:id?', function(req, res) {
+router.get('/id/:id', function(req, res) {
 
 	users.findById(req.params.id)
 		.exec(function(err,user){
@@ -48,7 +48,8 @@ router.get('/id/:id?', function(req, res) {
 		});
 });
 
-router.get('/buddies/:id?', function(req, res) {
+/* GET info on each buddy of the given user */
+router.get('/buddies/:id', function(req, res) {
 	var json;
 	users.findById(req.params.id)
 		.exec(function(err,user){
@@ -90,37 +91,38 @@ router.post('/newuser', function(req, res) {
 
 
 
-/* PUT users  */
+/* PUT users as friends  */
 
 //Find both users and add their id to the buddy list
 //Requires Id of both users
 router.put('/updatefriends/:id/:id2',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.send(err);
+		if(err) res.status(500).json({status: 'failure'});
 
 		//adds user to the buddy list, then
 		user1.buddies.push(req.params.id2);
 		user1.save(function(err)
 		{
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 		});
 
 	});
 		users.findById(req.params.id2, function(err, user2)
 		{
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 
 			user2.buddies.push(req.params.id);
 			user2.save(function(err)
 			{
-				if(err) res.send(err);
+				if(err) res.status(500).json({status: 'failure'});
 				res.status(200).json({status: 'success'});
 
 			});
 		});
 });
 
+/* PUT remove courses from their list  */
 //Allows the user to delete certain courses
 router.put('/deletecourses/:id',function(req,res) {
 	//expecting: {courses: [<course>, ....]
@@ -130,7 +132,7 @@ router.put('/deletecourses/:id',function(req,res) {
 		{ $pullAll: { courses : courses } },
 		{ safe: true },
 		function remove(err, obj) {
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 			res.status(200).json({status: 'success'});
 		});
 
@@ -152,6 +154,7 @@ router.put('/deletecourses/:id',function(req,res) {
 	//});
 });
 
+/* PUT add courses from their list  */
 //User can add courses to their user object
 router.put('/addcourses/:id', function(req, res) {
 	//expecting: {courses: [<course>, ....]
@@ -160,45 +163,62 @@ router.put('/addcourses/:id', function(req, res) {
 	//this should be an array
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.send(err);
+		if(err) res.status(500).json({status: 'failure'});
 		//Adds each course to the user
 		for(var i = 0; i < courses.length; i += 1)
 		{
-			user1.courses.push(courses[i]);
+			user1.courses.push(courses[i]);//May want to optimize this
 		}
 
 		//Array.prototype.push.apply(user1.courses, courses);
 		user1.save(function(err)
 		{
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});;
 			res.status(200).json({status: 'success'});
 		});
 
 	});
 });
 
+/* PUT update courses on their list  */
+router.put('/setcourses/:id', function(req, res) {
 
+	users.findById(req.params.id, function(err, user1)
+	{
+		if(err) res.status(500).json({status: 'failure'});
+
+		user1.courses = req.body.courses;
+		//Array.prototype.push.apply(user1.courses, courses);
+		user1.save(function(err)
+		{
+			if(err) res.status(500).json({status: 'failure'});
+			res.status(200).json({status: 'success'});
+		});
+	});
+});
+
+/* PUT update the major of the user */
 //Sets the major of the person
 router.put('/setmajor/:id/:major', function(req, res) {
 
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.send(err);
+		if(err) res.status(500).json({status: 'failure'});
 
 		user1.major = req.params.major;
 		//Array.prototype.push.apply(user1.courses, courses);
 		user1.save(function(err)
 		{
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 			res.status(200).json({status: 'success'});
 		});
-
 	});
 });
 
 
 //*******LAST TWO ARE UNTESTED*******************************
 
+/* PUT remove sessions from their list  */
 //unjoin a session
 router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 	users.update(
@@ -206,22 +226,24 @@ router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 		{ $pull: { sessions : req.params.sessionid } },
 		{ safe: true },
 		function remove(err, obj) {
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 			res.status(200).json({status: 'success'});
 		});
 });
 
+
+/* PUT add sessions from their list  */
 //join a session, add the session id to the array list of session ids
 router.put('/joinsession/:id/:sessionid',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
-		if(err) res.send(err);
+		if(err) res.status(500).json({status: 'failure'});
 
 		//adds user to the buddy list, then
 		user1.sessions.push(req.params.sessionid);
 		user1.save(function(err)
 		{
-			if(err) res.send(err);
+			if(err) res.status(500).json({status: 'failure'});
 		});
 
 	});

@@ -11,3 +11,4 @@ var Session = mongoose.Schema({
 });
 
 module.exports = mongoose.model('Session', Session);
+
