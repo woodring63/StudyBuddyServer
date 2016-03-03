@@ -196,7 +196,7 @@ router.put('/updatefriends/:id/:id2',function(req,res) {
 /* PUT remove courses from their list  */
 //Allows the user to delete certain courses
 router.put('/deletecourses/:id',function(req,res) {
-	//expecting: {courses: [<course>, ....]
+	//expecting: {courses: [<course>, ....]}
 	var courses = req.body.courses;
 	users.update(
 		{ _id: req.params.id },

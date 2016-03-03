@@ -36,16 +36,13 @@ router.get('/:course/:startTime/:endTime', function(req,res) {
     }
     if(req.params.startTime != '0')
     {
-        arr.push({startTime : {$gte : req.params.startTime}});
+        arr.push({startTime : {$gte : parseInt(req.params.startTime)}});
     }
     if(req.params.endTime != '0')
     {
-        arr.push({endTime : {$lte : req.params.endTime}});
+        arr.push({endTime : {$lte : parseInt(req.params.endTime)}});
     }
-    if(req.params.date != '0')
-    {
-        arr.push({date : req.params.date});
-    }
+
 
     console.log(arr);
     sessions.find({ $and : arr }, function(err, array) {
@@ -68,7 +65,6 @@ router.get('/:course/:startTime/:endTime', function(req,res) {
 router.post('/newsession', function(req, res) {
     //If more info than necessary is given, it will indiscriminately
     //stored in the database
-    console.log("Entered");
     var record = new sessions(req.body);
     record.save(function(err){
         if(err) {
