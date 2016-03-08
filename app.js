@@ -6,13 +6,15 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
 var index = require('./routes/index');
+var users = require('./routes/users');
+var sessions = require('./routes/sessions');
 
-var Session = require('./models/session');
+//var Session = require('./models/session');
 
 var app = express();
 
 // connect to db
-//mongoose.connect('mongodb://localhost/studybuddy');
+mongoose.connect('mongodb://localhost:27017/StudyBuddy');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/sessions',sessions);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   res.sendStatus(404);
