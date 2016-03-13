@@ -38,7 +38,7 @@ router.get('/name/:name', function(req, res) {
  *      returns json {user:{},newSessions:[{}],joinedSessions[{}], createdSessions[{}]}
  *      if the user is not found, returns {status:failure}
  */
-//NEEDS UPDATING TO INCLUDE CREATEDSESSIONS
+//NEEDS TESTING for createdSessions
 router.get('/username/:username', function(req, res) {
 
 	users.findOne({username : req.params.username})
@@ -48,13 +48,14 @@ router.get('/username/:username', function(req, res) {
 				res.status(500).json({status: 'failure'});
 			} else {
 				//User should be a JSON document
-				var json = {user : user};
+				var json = {user : user, joinedSessions: [], createdSessions: []};
 				console.log(user);
 
 				//Also return all sessions will occur with the users classes in the next 24 hours
 				sessions.find(
 					({$and : [{course : user.courses },
-						{startTime : {$gte : new Date().getTime(), $lte : new Date().getTime() + 86400000}}]}))
+						      {startTime : {$gte : new Date().getTime(),
+                                            $lte : new Date().getTime() + 86400000}}]}))
 					.exec(function(err,newsessions){
 						if (err)
 						{
@@ -66,15 +67,26 @@ router.get('/username/:username', function(req, res) {
 							console.log(newsessions);
 							console.log(json);
 							//Also find info on all the users sessions
-							sessions.find({ _id : {$in : user.sessions}})
-								.exec(function(err,joinedSessions)
+							sessions.find({ _id : {$or : [{$in : user.sessions},
+                                                          {$in : user.createdSessions}]}})
+								.exec(function(err,sessions)
 								{
 									if(err)
 									{
 										res.status(500).json({status: 'failure'});
 									}else
 									{
-										json.joinedSessions = joinedSessions;
+                                        for(var i = 0; i < sessions.length; i++)
+                                        {
+                                            if(sessions[i].leader == user._id)
+                                            {
+                                                json.createdSessions.push(sessions[i]);
+                                            }
+                                            else
+                                            {
+                                                json.joinedSessions.push(sessions[i]);
+                                            }
+                                        }
 										console.log(json);
 										res.json(json);
 									}
