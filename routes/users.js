@@ -2,15 +2,15 @@ var express = require('express');
 var router = express.Router();
 var users = require('../models/users');
 var mongoose = require('mongoose');
-var sessions = require('../models/session'); //Not tested
-//mongoose.connect('mongodb://localhost:3000');
-
+var sessions = require('../models/session');
 
 /* GET users listing. */
-// /users/<name>
+/**
+ * Searches for users by name in the database
+ *     return json of users {users:[{}]}
+ *	   if not successful, returns {status:failure}
+ */
 
-// returns a users by name
-//Searches for users
 router.get('/name/:name', function(req, res) {
 
 	console.log(req.params.name);
@@ -31,6 +31,14 @@ router.get('/name/:name', function(req, res) {
 });
 
 /* GET info of the user with this username*/
+/**
+ * 	Used for logging in and finding if a user exists,then if they do, it finds
+ *  info about all of their sessions, and the sessions that are related to
+ *  their classes occuring in the next 24 hours
+ *      returns json {user:{},newSessions:[{}],joinedSessions[{}], createdSessions[{}]}
+ *      if the user is not found, returns {status:failure}
+ */
+//NEEDS UPDATING TO INCLUDE CREATEDSESSIONS
 router.get('/username/:username', function(req, res) {
 
 	users.findOne({username : req.params.username})
@@ -80,8 +88,12 @@ router.get('/username/:username', function(req, res) {
 });
 
 /* GET info of the user with the given id */
-//Returns a specific user by searching for their info with their id
-//Will be used to get a friend's info or their info
+/**
+ * 	Will return a specific user.  Will not be used for login.
+ *      return json {user:{}}
+ *      else {status:failure}
+ */
+
 router.get('/id/:id', function(req, res) {
 
 	users.findById(req.params.id)
@@ -99,6 +111,13 @@ router.get('/id/:id', function(req, res) {
 });
 
 /* GET info on each buddy of the given user */
+/**
+ *  Finds info for each buddy of the user passed to the server. May return
+ *  empty if user has no buddies
+ *      returns json {buddies:[{}]}
+ *      if error, returns {status:failure}
+ */
+
 router.get('/buddies/:id', function(req, res) {
 	var json;
 	users.findById(req.params.id)
@@ -126,8 +145,24 @@ router.get('/buddies/:id', function(req, res) {
 });
 
 /* POST users  */
+/**
+ *  Will take any user and throw it in the database so it must be
+ *  formatted specifically for the db
+ *      Pass in a user of the form:
+ *		{
+ *          name: String,
+ *          username: String,
+ *          courses: Array of Strings,
+ *          major: String,
+ *          bio: String,
+ *          buddies: [],
+ *          sessions: [],
+ *          createdSessions: []
+ *      }
+ *      Leave the last two fields as empty arrays
+ *          returns json {status:failure/success}
+ */
 
-//Stores the data in the database
 router.post('/newuser', function(req, res) {
 	//If more info than necessary is given, it will indiscriminately
 	//stored in the database
@@ -143,12 +178,14 @@ router.post('/newuser', function(req, res) {
 	});
 });
 
-
-
 /* PUT users as friends  */
+/**
+ * Uses the id of the two to become friends to add them to each other's
+ * buddy list.  Only use this method after the second person has accepted
+ * the request
+ *     returns json {status:failure/success}
+ */
 
-//Find both users and add their id to the buddy list
-//Requires Id of both users
 router.put('/updatefriends/:id/:id2',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
@@ -194,7 +231,16 @@ router.put('/updatefriends/:id/:id2',function(req,res) {
 });
 
 /* PUT remove courses from their list  */
-//Allows the user to delete certain courses
+/**
+ *	Deletes the courses from the array passed to the server from the
+ *  course list of the given user
+ *  Pass the courses in a json object like:
+ *  {
+ *      courses : ["COMS 309, ...]
+ *  }
+ *      returns json {status:failure/success}
+ */
+
 router.put('/deletecourses/:id',function(req,res) {
 	//expecting: {courses: [<course>, ....]}
 	var courses = req.body.courses;
@@ -211,27 +257,19 @@ router.put('/deletecourses/:id',function(req,res) {
 				res.status(200).json({status: 'success'});
 			}
 		});
-
-
-
-	//this should be an array
-	//users.findById(req.params.id, function(err, user1)
-	//{
-	//	if(err) res.send(err);
-	//	//Adds each course to the user
-    //
-	//	//Array.prototype.push.apply(user1.courses, courses);
-	//	user1.save(function(err)
-	//	{
-	//		if(err) res.send(err);
-	//		res.status(200).json({status: 'success'});
-	//	});
-    //
-	//});
 });
 
 /* PUT add courses from their list  */
-//User can add courses to their user object
+/**
+ *	Adds courses from the given array to the user object.  Does not
+ *  overwrite the current array
+ *  Pass the courses in the form of a json object:
+ *  {
+ *      courses : ["COMS 309, ...]
+ *  }
+ *      returns json {status:failure/success}
+ */
+
 router.put('/addcourses/:id', function(req, res) {
 	//expecting: {courses: [<course>, ....]
 	var courses = req.body.courses;
@@ -267,6 +305,16 @@ router.put('/addcourses/:id', function(req, res) {
 });
 
 /* PUT update courses on their list  */
+/**
+ * 	More useful and quicker than the last method. Replaces the old courses
+ *  with the new array of courses
+ *  Pass the courses in the form of a json object:
+ *  {
+ *      courses : ["COMS 309, ...]
+ *  }
+ *      returns json {status:failure/success}
+ */
+
 router.put('/setcourses/:id', function(req, res) {
 
 	users.findById(req.params.id, function(err, user1)
@@ -292,7 +340,12 @@ router.put('/setcourses/:id', function(req, res) {
 });
 
 /* PUT update the major of the user */
-//Sets the major of the person
+/**
+ * Sets the major of the person from the params.  Now that I'm thinking
+ * about it, I have doubts about this method, but I think it has worked
+ *     returns json {status:failure/success}
+ */
+
 router.put('/setmajor/:id/:major', function(req, res) {
 
 	users.findById(req.params.id, function(err, user1)
@@ -318,11 +371,14 @@ router.put('/setmajor/:id/:major', function(req, res) {
 	});
 });
 
-
-
 /* PUT remove sessions from their list  */
-//unjoin a session
-router.put('/unjoinsession/:id/:sessionid',function(req,res) {
+/**
+ * Removes the person from the attendance list of the session and the
+ * session from the joinedSession of the user
+ *     returns json {status:failure/success}
+ */
+
+router.put('/leavesession/:id/:sessionid',function(req,res) {
 	users.update(
 		{ _id: req.params.id },
 		{ $pull: { sessions : req.params.sessionid } },
@@ -348,9 +404,13 @@ router.put('/unjoinsession/:id/:sessionid',function(req,res) {
 		});
 });
 
-
 /* PUT add sessions from their list  */
-//join a session, add the session id to the array list of session ids
+/**
+ * Adds the person to the sessions attendance and the session to the list
+ * joined session of the user
+ *     returns json {status:failure/success}
+ */
+
 router.put('/joinsession/:id/:sessionid',function(req,res) {
 	users.findById(req.params.id, function(err, user1)
 	{
@@ -392,8 +452,5 @@ router.put('/joinsession/:id/:sessionid',function(req,res) {
 
 	});
 });
-
-
-
 
 module.exports = router;

@@ -6,9 +6,13 @@ var router = express.Router();
 var sessions = require('../models/session');
 var mongoose = require('mongoose');
 
-
-
 /* GET session by id. */
+/**
+ * Finds the session with the given id
+ *     returns json {session : {}}
+ *     else returns {status : failure}
+ */
+
 router.get('/id/:id', function(req, res) {
     sessions.findById(req.params.id)
         .exec(function(err,session){
@@ -24,7 +28,15 @@ router.get('/id/:id', function(req, res) {
         });
 });
 
-/* GET sessions with filter*/           //20161118
+/* GET sessions with filter*/
+/**
+ * Filters the sessions by courses, end times, and/or start times. If any
+ * parameter is not used, place a 0 in it's spot. The course should have
+ * no space in it.
+ *     returns json {sessions : [{}]}
+ *     may be empty or returns {status:failure}
+ */
+
 router.get('/:course/:startTime/:endTime', function(req,res) {
     //Checks which fields are filled out and then constructs an object to search for based off
     //these parameters
@@ -42,8 +54,6 @@ router.get('/:course/:startTime/:endTime', function(req,res) {
     {
         arr.push({endTime : {$lte : parseInt(req.params.endTime)}});
     }
-
-
     console.log(arr);
     sessions.find({ $and : arr }, function(err, array) {
         if(err) {
@@ -58,10 +68,26 @@ router.get('/:course/:startTime/:endTime', function(req,res) {
 
 });
 
-
-
-
 /* POST a session into the db. */
+/**
+ * Will indiscriminately take the given session and put it into the
+ * database, so it must be formatted correctly. Times are in milliseconds
+ * and include the date.  Leave attendees and messages as an empty array
+ * Pass it in the form of:
+ * {
+ *     title : String,
+ *     startTime : Number,
+ *     endTime : Number,
+ *     course: String,
+ *     bio : String,
+ *     attendees : [],
+ *     messages : [],
+ *     course : String,
+ *     leader : String
+ * }
+ * returns json {status:failure/success}
+ */
+
 router.post('/newsession', function(req, res) {
     //If more info than necessary is given, it will indiscriminately
     //stored in the database

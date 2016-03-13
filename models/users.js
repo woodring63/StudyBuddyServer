@@ -4,15 +4,19 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-
-//First argument is the collection
+/**
+ * The schema of the user. The User object on the android side should format everything
+ * accordingly.
+ */
 var userSchema = new Schema({
     name: String,
     username: {type: String, required: true, unique: true},
     courses: Array,
     major: String,
+    bio: String,
     buddies: Array, //stored as IDs
-    sessions: Array
+    sessions: Array,
+    createdSessions: Array
 });
 
 //***********The following code will most likely not be used***
