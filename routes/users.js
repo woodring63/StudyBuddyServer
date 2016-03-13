@@ -38,7 +38,7 @@ router.get('/name/:name', function(req, res) {
  *      returns json {user:{},newSessions:[{}],joinedSessions[{}], createdSessions[{}]}
  *      if the user is not found, returns {status:failure}
  */
-//NEEDS TESTING for createdSessions
+
 router.get('/username/:username', function(req, res) {
 
 	users.findOne({username : req.params.username})
@@ -67,8 +67,7 @@ router.get('/username/:username', function(req, res) {
 							console.log(newsessions);
 							console.log(json);
 							//Also find info on all the users sessions
-							sessions.find({ _id : {$or : [{$in : user.sessions},
-                                                          {$in : user.createdSessions}]}})
+							sessions.find({ _id : {$in : user.sessions.concat(user.createdSessions)}})
 								.exec(function(err,sessions)
 								{
 									if(err)

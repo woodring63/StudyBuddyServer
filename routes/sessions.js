@@ -4,6 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var sessions = require('../models/session');
+var users = require('../models/users');
 var mongoose = require('mongoose');
 
 /* GET session by id. */
@@ -73,6 +74,8 @@ router.get('/:course/:startTime/:endTime', function(req,res) {
  * Will indiscriminately take the given session and put it into the
  * database, so it must be formatted correctly. Times are in milliseconds
  * and include the date.  Leave attendees and messages as an empty array
+ * Place id of the leader in the json object and the server will then
+ * update the leaders information as well.
  * Pass it in the form of:
  * {
  *     title : String,
@@ -92,15 +95,41 @@ router.post('/newsession', function(req, res) {
     //If more info than necessary is given, it will indiscriminately
     //stored in the database
     var record = new sessions(req.body);
-    record.save(function(err){
-        if(err) {
-            console.log(err);
-            res.status(500).json({status: 'failure'});
-        }else{
-            //User should be a JSON document
-            res.status(200).json({status: 'success'});
-        }
-    });
+    users.findById(record.leader)
+         .exec(function(err,user){
+            if(err)
+            {
+                console.log(err);
+                res.status(500).json({status: 'failure'});
+            }else
+            {
+                record.save(function(err,session) {
+                    if (err) {
+                        console.log(err);
+                        res.status(500).json({status: 'failure'});
+                    } else {
+                        user.createdSessions.push(session._id)
+                        user.save(function(err)
+                        {
+                            if(err)
+                            {
+                                res.status(500).json({status: 'failure'});
+                            }else
+                            {
+                                res.status(200).json({status: 'success'});
+                            }
+
+                        });
+                    }
+                });
+            }
+         });
 });
 
+/**/
+/**
+ *
+ */
+
 module.exports = router;
+
