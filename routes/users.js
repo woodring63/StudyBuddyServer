@@ -3,6 +3,9 @@ var router = express.Router();
 var users = require('../models/users');
 var mongoose = require('mongoose');
 var sessions = require('../models/session');
+var fs = require('fs');
+
+var photoDir = '../photos/';
 
 /* GET users listing. */
 /**
@@ -153,6 +156,33 @@ router.get('/buddies/:id', function(req, res) {
 
 		}
 		});
+});
+
+/*GET photo of specific user*/
+/**
+ * This method will find the file for the photo of the specific user and send it
+ * back
+ *     returns photo if successful
+ *     if not found, returns {status:failure}
+ */
+
+router.get('/photo/:id',function(req,res) {
+// The filename is simple the local directory and tacks on the requested url
+    var filename = photoDir+req.params.id;
+
+    // This line opens the file as a readable stream
+    var readStream = fs.createReadStream(filename);
+
+    // This will wait until we know the readable stream is actually valid before piping
+    readStream.on('open', function () {
+        // This just pipes the read stream to the response object (which goes to the client)
+        readStream.pipe(res);
+    });
+
+    // This catches any errors that happen while creating the readable stream (usually invalid names)
+    readStream.on('error', function(err) {
+        res.end(err);
+    });
 });
 
 /* POST users  */
