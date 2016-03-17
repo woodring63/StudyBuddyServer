@@ -47,10 +47,16 @@ router.get('/username/:username', function(req, res) {
 
 	users.findOne({username : req.params.username})
 		.exec(function(err,user){
-			if(err || !user){
+			if(err){
 				console.log(err);
 				res.status(500).json({status: 'failure'});
-			} else {
+			}
+            else if (! user)
+            {
+                console.log(err);
+                res.status(500).json({status: 'failure',msg: "user does not exist"});
+            }
+            else {
 				//User should be a JSON document
 				var json = {user : user, joinedSessions: [], createdSessions: []};
 				console.log(user);
@@ -63,6 +69,7 @@ router.get('/username/:username', function(req, res) {
 					.exec(function(err,newsessions){
 						if (err)
 						{
+                            console.log(err);
 							res.status(500).json({status: 'failure'});
 						}
 						else
@@ -76,6 +83,7 @@ router.get('/username/:username', function(req, res) {
 								{
 									if(err)
 									{
+                                        console.log(err);
 										res.status(500).json({status: 'failure'});
 									}else
 									{
@@ -172,7 +180,7 @@ router.get('/photo/:id',function(req,res) {
     var filename = photoDir+req.params.id;
 
     // This line opens the file as a readable stream
-    var readStream = fs.createReadStream(filename);
+    var readStream = fs.createReadStream(__dirname + '/photos/'+ filename);
 
     // This will wait until we know the readable stream is actually valid before piping
     readStream.on('open', function () {
