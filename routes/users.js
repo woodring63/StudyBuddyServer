@@ -4,6 +4,7 @@ var users = require('../models/users');
 var mongoose = require('mongoose');
 var sessions = require('../models/session');
 var fs = require('fs');
+var busboy = require('connect-busboy');
 
 var photoDir = '../photos/';
 
@@ -46,7 +47,7 @@ router.get('/username/:username', function(req, res) {
 
 	users.findOne({username : req.params.username})
 		.exec(function(err,user){
-			if(err){
+			if(err || !user){
 				console.log(err);
 				res.status(500).json({status: 'failure'});
 			} else {
@@ -165,7 +166,7 @@ router.get('/buddies/:id', function(req, res) {
  *     returns photo if successful
  *     if not found, returns {status:failure}
  */
-
+///UNTESTED
 router.get('/photo/:id',function(req,res) {
 // The filename is simple the local directory and tacks on the requested url
     var filename = photoDir+req.params.id;
@@ -217,6 +218,28 @@ router.post('/newuser', function(req, res) {
 			res.status(200).json({status: 'success'});
 		}
 	});
+});
+
+/*POST upload a photo for the user*/
+/**
+ * The name of the photo will be the id of the user. IT will be stored
+ * in the photo directory
+ */
+
+router.post('/upload',function(req, res){
+    var fstream;
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+        console.log("Uploading: " + filename);
+
+        //Path where image will be uploaded
+        fstream = fs.createWriteStream(__dirname + '/photos/' + filename);
+        file.pipe(fstream);
+        fstream.on('close', function () {
+            console.log("Upload Finished of " + filename);
+            res.redirect('back');           //where to go next
+        });
+    });
 });
 
 /* PUT users as friends  */
