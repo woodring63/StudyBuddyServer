@@ -11,6 +11,7 @@ var sessions = mongoose.Schema({
 	endTime: Number,
     course: String,
 	attendees: Array,
+	bio: String,
 	messages: Array,
 	leader: String,
 	loc: {
