@@ -38,14 +38,14 @@ router.get('/id/:id', function(req, res) {
  *     may be empty or returns {status:failure}
  */
 
-router.get('/:course/:startTime/:endTime', function(req,res) {
+router.get('/filter/:course/:startTime/:endTime', function(req,res) {
     //Checks which fields are filled out and then constructs an object to search for based off
     //these parameters
     var arr = [];
     if(req.params.course != '0')
     {
         var str = req.params.course;
-        arr.push({course : str.slice(0,str.length - 3) + ' ' + str.slice(str.length - 3)});
+        arr.push({course : str.replace("%20"," ")});
     }
     if(req.params.startTime != '0')
     {

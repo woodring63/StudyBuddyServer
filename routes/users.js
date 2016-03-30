@@ -302,6 +302,31 @@ router.put('/updatefriends/:id/:id2',function(req,res) {
 
 });
 
+/* PUT delete the user from the user buddy list  */
+/**
+ * The first id is the current user and the second id is the buddy that
+ * the user wants to remove from their buddy list. Does not remove the first user
+ * from the buddy list of the second user.
+ *     returns json {status:failure/success}
+ */
+//UNTESTED
+router.put('/deletefriend/:id/:id2',function(req,res) {
+	users.findById(
+        { _id: req.params.id },
+        { $pull: { buddies : id2 } },
+        { safe: true }, function(err, user1) {
+		if(err) {
+			res.status(500).json({status: 'failure'});
+		}
+		else
+		{
+            res.status(200).json({status: 'success'});
+		}
+
+	});
+
+});
+
 /* PUT remove courses from their list  */
 /**
  *	Deletes the courses from the array passed to the server from the
