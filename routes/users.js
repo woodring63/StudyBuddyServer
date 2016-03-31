@@ -59,11 +59,10 @@ router.get('/username/:username', function(req, res) {
             else {
 				//User should be a JSON document
 				var json = {user : user, joinedSessions: [], createdSessions: []};
-				console.log(user);
 
 				//Also return all sessions will occur with the users classes in the next 24 hours
 				sessions.find(
-					({$and : [{course : user.courses },
+					({$and : [{course : {$in : user.courses}},
 						      {startTime : {$gte : new Date().getTime(),
                                             $lte : new Date().getTime() + 86400000}}]}))
 					.exec(function(err,newsessions){
@@ -75,8 +74,7 @@ router.get('/username/:username', function(req, res) {
 						else
 						{
 							json.newSessions = newsessions;
-							console.log(newsessions);
-							console.log(json);
+							console.log(user.courses);
 							//Also find info on all the users sessions
 							sessions.find({ _id : {$in : user.sessions.concat(user.createdSessions)}})
 								.exec(function(err,sessions)
@@ -98,14 +96,12 @@ router.get('/username/:username', function(req, res) {
                                                 json.joinedSessions.push(sessions[i]);
                                             }
                                         }
-										console.log(json);
 										res.json(json);
 									}
 
 								});
 						}
 					});
-
 			}
 		});
 });
