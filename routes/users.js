@@ -51,7 +51,7 @@ router.get('/username/:username', function(req, res) {
 				console.log(err);
 				res.status(500).json({status: 'failure'});
 			}
-            else if (! user)
+            else if (!user)
             {
                 console.log(err);
                 res.status(500).json({status: 'failure',msg: "user does not exist"});
@@ -241,7 +241,7 @@ router.post('/upload',function(req, res){
         file.pipe(fstream);
         fstream.on('close', function () {
             console.log("Upload Finished of " + filename);
-            res.redirect('back');           //where to go next
+            res.redirect('back');
         });
     });
 });
@@ -403,7 +403,7 @@ router.put('/addcourses/:id', function(req, res) {
  *  with the new array of courses
  *  Pass the courses in the form of a json object:
  *  {
- *      courses : ["COMS 309, ...]
+ *      courses : ["COMS 309", ...]
  *  }
  *      returns json {status:failure/success}
  */
@@ -416,7 +416,8 @@ router.put('/setcourses/:id', function(req, res) {
 			res.status(500).json({status: 'failure'});
 		}
 		else
-		{		user1.courses = req.body.courses;
+		{
+            user1.courses = req.body.courses;
 			//Array.prototype.push.apply(user1.courses, courses);
 			user1.save(function(err)
 			{
@@ -513,6 +514,22 @@ router.put('/joinsession/:id/:sessionid',function(req,res) {
 		else
 		{
 			//adds user to the buddy list, then
+			for(var i = 0; i < user1.createdSessions.length; i ++)
+            {
+                if(user1.createdSessions[i] != req.params.sessionid)
+                {
+                    res.status(200).json({status: 'success',msg:"User has already created this session"});
+                    return;
+                }
+            }
+            for(var i = 0; i < user1.joinedSessions.length; i ++)
+            {
+                if(user1.joinedSessions[i] != req.params.sessionid)
+                {
+                    res.status(200).json({status: 'success',msg:"User is already signed up for this session"});
+                    return;
+                }
+            }
 			user1.sessions.push(req.params.sessionid);
 			sessions.findById(req.params.sessionid, function(err,session) {
 				if(err)

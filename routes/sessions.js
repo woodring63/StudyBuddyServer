@@ -126,10 +126,118 @@ router.post('/newsession', function(req, res) {
          });
 });
 
-/**/
+/*PUT add a task to the session*/
 /**
+ * This method takes a json of task or json array of tasks and pushes it onto the array of tasks
+ * for this session. The tasks assume that the names are unique.  The tasks should be formatted accordingly:
+ * {
+ *      tasks: [{
+ *                  task: String,
+ *                  startTime: Number,
+ *                  endTime: Number,
+ *                  completed: Boolean
+ *             },...]
+ * }
  *
+ * returns json {status:failure/success}
  */
+
+router.put('/addtask/:sessionid',function(req,res){
+    sessions.update(
+        {_id: req.params.sessionid},
+        {$pushAll : {tasks : req.body.tasks}},
+        { safe: true },
+        function(err, session){
+            if(err) {
+                console.log(err);
+                res.status(500).json({status: 'failure'});
+            }else
+            {
+                res.status(200).json({status: 'success'});
+            }
+    });
+});
+
+/*PUT remove a task from the session*/
+/**
+ * The method finds the task of the given name form the given session id and removes it
+ * from the task array.  The tasks assume that the names are unique.
+ * May later be changed to account
+ * for their ids.
+ * returns json {status:failure/success}
+ */
+
+router.put('/removetask/:task/:sessionid',function(req,res){
+
+    var task = req.params.task.replace("%20"," ");
+
+    sessions.findById(req.params.sessionid, function(err, session){
+            if(err) {
+                console.log(err);
+                res.status(500).json({status: 'failure'});
+            }else
+            {
+                for(var i = 0; i < session.tasks.length; i++)
+                {
+                    if(session.tasks[i].task == task)
+                    {
+                        session.tasks[i].remove();
+                    }
+                }
+                session.save(function(err){
+                    if(err)
+                        res.status(500).json({status: 'failure'});
+                    else
+                    {
+                        res.status(200).json({status: 'success'});
+                    }
+                });
+            }
+        });
+});
+
+/*PUT remove a task from the session*/
+/**
+ * This method takes a json of task or json array of tasks and updates the task based on the given
+ * completed status. The tasks assume that the names are unique and takes names as the identifier.
+ * The tasks should be formatted accordingly:
+ * {
+ *     task: String,
+ *     completed: Boolean
+ * }
+ *
+ * returns json {status:failure/success}
+ */
+
+router.put('/updatetask/:sessionid',function(req,res){
+    sessions.findById( req.params.sessionid, function(err, session){
+            if(err) {
+                console.log(err);
+                res.status(500).json({status: 'failure'});
+            }else
+            {
+                for(var i = 0; i < session.tasks.length; i++)
+                {
+                    if(session.tasks[i].task == req.body.task)
+                    {
+                        session.tasks[i].completed = req.body.completed;
+                        console.log(session.tasks[i]);
+                    }
+                }
+                console.log(session.tasks);
+                session.save(function(err){
+                    if(err)
+                        res.status(500).json({status: 'failure'});
+                    else
+                    {
+                        res.status(200).json({status: 'success'});
+                    }
+                });
+            }
+        });
+});
+
+
 
 module.exports = router;
 
