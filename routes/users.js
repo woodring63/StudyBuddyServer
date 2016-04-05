@@ -305,13 +305,14 @@ router.put('/updatefriends/:id/:id2',function(req,res) {
  * from the buddy list of the second user.
  *     returns json {status:failure/success}
  */
-//UNTESTED
+
 router.put('/deletefriend/:id/:id2',function(req,res) {
-	users.findById(
+	users.update(
         { _id: req.params.id },
-        { $pull: { buddies : id2 } },
+        { $pull: { buddies : req.params.id2 } },
         { safe: true }, function(err, user1) {
 		if(err) {
+			console.log(err);
 			res.status(500).json({status: 'failure'});
 		}
 		else
