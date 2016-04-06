@@ -517,15 +517,15 @@ router.put('/joinsession/:id/:sessionid',function(req,res) {
 			//adds user to the buddy list, then
 			for(var i = 0; i < user1.createdSessions.length; i ++)
             {
-                if(user1.createdSessions[i] != req.params.sessionid)
+                if(user1.createdSessions[i] == req.params.sessionid)
                 {
                     res.status(200).json({status: 'success',msg:"User has already created this session"});
                     return;
                 }
             }
-            for(var i = 0; i < user1.joinedSessions.length; i ++)
+            for(var i = 0; i < user1.sessions.length; i ++)
             {
-                if(user1.joinedSessions[i] != req.params.sessionid)
+                if(user1.sessions[i] == req.params.sessionid)
                 {
                     res.status(200).json({status: 'success',msg:"User is already signed up for this session"});
                     return;
