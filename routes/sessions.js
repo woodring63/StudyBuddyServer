@@ -95,7 +95,7 @@ router.post('/newsession', function(req, res) {
     //If more info than necessary is given, it will indiscriminately
     //stored in the database
     var record = new sessions(req.body);
-    users.findById(record.leader)
+    users.findById(record.attendees[0])
          .exec(function(err,user){
             if(err)
             {
@@ -108,7 +108,7 @@ router.post('/newsession', function(req, res) {
                         console.log(err);
                         res.status(500).json({status: 'failure'});
                     } else {
-                        user.createdSessions.push(session._id)
+                        user.sessions.push(session._id)
                         user.save(function(err)
                         {
                             if(err)

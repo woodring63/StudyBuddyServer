@@ -12,14 +12,18 @@ var task = new mongoose.Schema({
     completed: Boolean
 });
 
+var messages = new mongoose.Schema({
+	timeStamp: Number,
+    message: Array
+});
+
 var sessions = mongoose.Schema({
 	startTime: Number,
 	endTime: Number,
     course: String,
 	attendees: Array,
 	bio: String,
-	messages: Array,
-	leader: String,
+	messages: [messages],
 	tasks: [task],
 	loc: {
 		type: { type: String },

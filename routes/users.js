@@ -58,7 +58,7 @@ router.get('/username/:username', function(req, res) {
             }
             else {
 				//User should be a JSON document
-				var json = {user : user, joinedSessions: [], createdSessions: []};
+				var json = {user : user, joinedSessions: []};
 
 				//Also return all sessions will occur with the users classes in the next 24 hours
 				sessions.find(
@@ -76,7 +76,7 @@ router.get('/username/:username', function(req, res) {
 							json.newSessions = newsessions;
 							console.log(user.courses);
 							//Also find info on all the users sessions
-							sessions.find({ _id : {$in : user.sessions.concat(user.createdSessions)}})
+							sessions.find({ _id : {$in : user.sessions}})
 								.exec(function(err,sessions)
 								{
 									if(err)
@@ -85,17 +85,7 @@ router.get('/username/:username', function(req, res) {
 										res.status(500).json({status: 'failure'});
 									}else
 									{
-                                        for(var i = 0; i < sessions.length; i++)
-                                        {
-                                            if(sessions[i].leader == user._id)
-                                            {
-                                                json.createdSessions.push(sessions[i]);
-                                            }
-                                            else
-                                            {
-                                                json.joinedSessions.push(sessions[i]);
-                                            }
-                                        }
+										json.joinedSessions = sessions;
 										res.json(json);
 									}
 
@@ -287,15 +277,11 @@ router.put('/updatefriends/:id/:id2',function(req,res) {
 						{
 							res.status(200).json({status: 'success'});
 						}
-
-
 					});
 				}
 			});
 		}
-
 	});
-
 });
 
 /* PUT delete the user from the user buddy list  */
@@ -514,15 +500,6 @@ router.put('/joinsession/:id/:sessionid',function(req,res) {
 		}
 		else
 		{
-			//adds user to the buddy list, then
-			for(var i = 0; i < user1.createdSessions.length; i ++)
-            {
-                if(user1.createdSessions[i] == req.params.sessionid)
-                {
-                    res.status(200).json({status: 'success',msg:"User has already created this session"});
-                    return;
-                }
-            }
             for(var i = 0; i < user1.sessions.length; i ++)
             {
                 if(user1.sessions[i] == req.params.sessionid)

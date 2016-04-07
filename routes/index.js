@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
 io.on('connection', function(socket){
     socket.on('new message',function(msg){
         console.log("message: " + msg);
-        io.emit('new message', {msg: msg});
+        io.emit('new message', msg);
     });
 });
 server.listen(8000);
