@@ -15,8 +15,7 @@ var userSchema = new Schema({
     major: String,
     bio: String,
     buddies: Array, //stored as IDs
-    sessions: Array,
-    createdSessions: Array
+    sessions: [String]
 });
 
 //***********The following code will most likely not be used***

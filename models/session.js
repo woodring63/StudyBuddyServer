@@ -21,7 +21,7 @@ var sessions = mongoose.Schema({
 	startTime: Number,
 	endTime: Number,
     course: String,
-	attendees: Array,
+	attendees: [String],
 	bio: String,
 	messages: [messages],
 	tasks: [task],

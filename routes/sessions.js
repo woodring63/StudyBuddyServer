@@ -103,6 +103,8 @@ router.post('/newsession', function(req, res) {
                 res.status(500).json({status: 'failure'});
             }else
             {
+                console.log(record);
+                console.log(record.attendees[0]);
                 record.save(function(err,session) {
                     if (err) {
                         console.log(err);

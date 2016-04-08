@@ -58,7 +58,7 @@ router.get('/username/:username', function(req, res) {
             }
             else {
 				//User should be a JSON document
-				var json = {user : user, joinedSessions: []};
+				var json = {user : user, joinedSessions: [], newSessions : []};
 
 				//Also return all sessions will occur with the users classes in the next 24 hours
 				sessions.find(
@@ -74,7 +74,6 @@ router.get('/username/:username', function(req, res) {
 						else
 						{
 							json.newSessions = newsessions;
-							console.log(user.courses);
 							//Also find info on all the users sessions
 							sessions.find({ _id : {$in : user.sessions}})
 								.exec(function(err,sessions)
@@ -460,29 +459,29 @@ router.put('/setmajor/:id/:major', function(req, res) {
  */
 
 router.put('/leavesession/:id/:sessionid',function(req,res) {
-	users.update(
-		{ _id: req.params.id },
-		{ $pull: { sessions : req.params.sessionid } },
-		{ safe: true },
-		function remove(err, obj) {
-			if(err) {
-				res.status(500).json({status: 'failure'});
-			}
-			else {
-				sessions.update(
-					{ _id: req.params.sessionid },
-					{ $pull: { attendees : req.params.id } },
-					{ safe: true },
-					function remove(err, obj) {
-						if(err) {
-							res.status(500).json({status: 'failure'});
-						}
-						else {
-							res.status(200).json({status: 'success'});
-						}
-					});
-			}
-		});
+
+    console.log(req.params.id + "  " + req.params.sessionid);
+    users.findById(req.params.id,function(err,user){
+        user.sessions.pull(req.params.sessionid);
+        console.log(user.sessions);
+        console.log(user);
+		user.markModified('sessions');
+        user.save();
+		sessions.update(
+			{ _id: req.params.sessionid },
+			{ $pull: { attendees : req.params.id } },
+			{ safe: true },
+			function(err, obj) {
+				if(err) {
+					res.status(500).json({status: 'failure'});
+				}
+				else {
+					console.log(user);
+					res.status(200).json({status: 'success'});
+				}
+			});
+    });
+
 });
 
 /* PUT add sessions from their list  */
