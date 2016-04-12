@@ -19,6 +19,10 @@ io.on('connection', function(socket){
         console.log("message: " + msg);
         io.emit('new message', msg);
     });
+    socket.on('new bitmap',function(msg){
+        console.log("message: " + msg);
+        io.emit('new bitmap', msg);
+    });
 });
 server.listen(8000);
 
