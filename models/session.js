@@ -13,8 +13,8 @@ var task = new mongoose.Schema({
 });
 
 var messages = new mongoose.Schema({
-	timeStamp: Number,
-    message: Array
+	name: String,
+    message: String
 });
 
 var sessions = mongoose.Schema({
@@ -25,6 +25,7 @@ var sessions = mongoose.Schema({
 	bio: String,
 	messages: [messages],
 	tasks: [task],
+	whiteboard: String,
 	loc: {
 		type: { type: String },
 		coordinates: []
