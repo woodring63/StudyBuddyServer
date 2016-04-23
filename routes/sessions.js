@@ -69,6 +69,53 @@ router.get('/filter/:course/:startTime/:endTime', function(req,res) {
 
 });
 
+/*GET the current document that has been stored in the db*/
+/**
+ * Returns a json containing the current string object stored for the document in the database.
+ * Sends the json in the form:
+ * {
+ *     document: String
+ * }
+ * else it will return status:failure
+ */
+
+router.get('/document/:sessionid',function(req,res) {
+    sessions.findById(req.params.sessionid, function(err,session){
+        if(err)
+        {
+            console.log(err);
+            res.status(500).json({status:'failure'});
+        }else{
+            res.json({document:session.document});
+        }
+
+    })
+});
+
+/*GET the current  whiteboard that has been stored in the db*/
+/**
+ * Returns a json containing the current string object stored for the document in the database.
+ * Sends the json in the form:
+ * {
+ *     whiteboard: String
+ * }
+ * else it will return status:failure
+ */
+
+router.get('/whiteboard/:sessionid',function(req,res) {
+    sessions.findById(req.params.sessionid, function(err,session){
+        if(err)
+        {
+            console.log(err);
+            res.status(500).json({status:'failure'});
+        }else{
+            res.json({whiteboard:session.whiteboard});
+        }
+
+    })
+});
+
+
 /* POST a session into the db. */
 /**
  * Will indiscriminately take the given session and put it into the
@@ -238,6 +285,8 @@ router.put('/updatetask/:sessionid',function(req,res){
             }
         });
 });
+
+
 
 
 

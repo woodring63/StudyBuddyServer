@@ -26,6 +26,7 @@ var sessions = mongoose.Schema({
 	messages: [messages],
 	tasks: [task],
 	whiteboard: String,
+	document: String,
 	loc: {
 		type: { type: String },
 		coordinates: []

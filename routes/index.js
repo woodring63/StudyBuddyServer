@@ -33,7 +33,17 @@ io.on('connection', function(socket){
 
     socket.on('new bitmap',function(msg){
         console.log("message: " + msg);
+        sessions.update(
+            {_id: msg.session},
+            {whiteboard: msg.image},
+            {safe:true},
+            function(err,message){
+                if(err){
+                    console.log(err);
+                }
+            });
         io.emit('new bitmap', msg);
+
     });
 });
 server.listen(8000);
