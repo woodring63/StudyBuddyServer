@@ -22,13 +22,12 @@ io.on('connection', function(socket){
             function(err, session){
                 if(err) {
                     console.log(err);
-                    res.status(500).json({status: 'failure'});
                 }else
                 {
-                    res.status(200).json({status: 'success'});
+                    msg.id = session._id;
+                    io.emit('task', msg);
                 }
             });
-        io.emit('task', msg);
     });
 
     socket.on('remove task',function(msg){
