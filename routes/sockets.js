@@ -29,7 +29,7 @@ io.on('connection', function(socket){
                 }
             });
     });
-
+//This is broken and functionality does not exist on the android side
     socket.on('remove task',function(msg){
         console.log("Received tasks");
         sessions.update(
