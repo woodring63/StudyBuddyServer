@@ -16,8 +16,8 @@ io.on('connection', function(socket){
     socket.on('add task',function(msg){
         console.log("Received tasks");
         sessions.update(
-            {_id: req.params.sessionid},
-            {$push: {tasks : req.body.tasks}},
+            {_id: msg.session},
+            {$push: {tasks : msg}},
             { safe: true },
             function(err, session){
                 if(err) {
@@ -33,7 +33,7 @@ io.on('connection', function(socket){
     socket.on('remove task',function(msg){
         console.log("Received tasks");
         sessions.update(
-            {_id: req.params.sessionid},
+            {_id: msg.session},
             {$pullAll : {tasks : req.body.tasks}},
             { safe: true },
             function(err, session){
