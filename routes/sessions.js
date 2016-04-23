@@ -86,7 +86,7 @@ router.get('/document/:sessionid',function(req,res) {
             console.log(err);
             res.status(500).json({status:'failure'});
         }else{
-            res.json({document:session.document});
+            res.json({text:session.document});
         }
 
     })
@@ -112,6 +112,22 @@ router.get('/whiteboard/:sessionid',function(req,res) {
             res.json({whiteboard:session.whiteboard});
         }
 
+    })
+});
+
+/* GET the tasks of the session*/
+/**
+ *
+ */
+router.get('/tasks/:sessionid',function(req,res) {
+    sessions.findById(req.params.sessionid, function(err,session){
+        if(err)
+        {
+            console.log(err);
+            res.status(500).json({status:'failure'});
+        }else{
+            res.json({tasks:session.tasks});
+        }
     })
 });
 

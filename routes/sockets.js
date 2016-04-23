@@ -11,7 +11,10 @@ io.on('connection', function(socket){
     socket.on('new mutation',function(msg){
         console.log("Received");
         io.emit('new mutation', msg);
-        sessions.
+    });
+    socket.on('task',function(msg){
+        console.log("Received tasks");
+        io.emit('task', msg);
     });
 });
 server.listen(8300);
