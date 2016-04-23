@@ -50,6 +50,9 @@ router.get('/filter/:course/:startTime/:endTime', function(req,res) {
     if(req.params.startTime != '0')
     {
         arr.push({startTime : {$gte : parseInt(req.params.startTime)}});
+    }else
+    {
+        arr.push({startTime : {$gte : new Date().getTime() - 86400000 * 7}});
     }
     if(req.params.endTime != '0')
     {

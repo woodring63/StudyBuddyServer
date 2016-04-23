@@ -4,7 +4,7 @@
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-
+var sessions = require('../models/session');
 
 io.on('connection', function(socket){
 
@@ -12,9 +12,42 @@ io.on('connection', function(socket){
         console.log("Received");
         io.emit('new mutation', msg);
     });
-    socket.on('task',function(msg){
+
+    socket.on('add task',function(msg){
         console.log("Received tasks");
+        sessions.update(
+            {_id: req.params.sessionid},
+            {$push: {tasks : req.body.tasks}},
+            { safe: true },
+            function(err, session){
+                if(err) {
+                    console.log(err);
+                    res.status(500).json({status: 'failure'});
+                }else
+                {
+                    res.status(200).json({status: 'success'});
+                }
+            });
         io.emit('task', msg);
     });
+
+    socket.on('remove task',function(msg){
+        console.log("Received tasks");
+        sessions.update(
+            {_id: req.params.sessionid},
+            {$pullAll : {tasks : req.body.tasks}},
+            { safe: true },
+            function(err, session){
+                if(err) {
+                    console.log(err);
+                    res.status(500).json({status: 'failure'});
+                }else
+                {
+                    res.status(200).json({status: 'success'});
+                }
+            });
+        io.emit('remove task', {id:msg.id});
+    });
+
 });
 server.listen(8300);
