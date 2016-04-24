@@ -159,7 +159,7 @@ router.get('/buddies/:id', function(req, res) {
  *     returns photo if successful
  *     if not found, returns {status:failure}
  */
-///UNTESTED
+
 router.get('/photo/:id',function(req,res) {
 // The filename is simple the local directory and tacks on the requested url
     var filename = photoDir+req.params.id;

@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
  * Point is a good example.  For more info : https://docs.mongodb.org/manual/applications/geospatial-indexes/
  */
 var task = new mongoose.Schema({
-    task: String,
+    name: String,
     startTime: Number,
     endTime: Number,
     completed: Boolean

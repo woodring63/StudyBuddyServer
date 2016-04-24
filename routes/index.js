@@ -16,6 +16,7 @@ router.get('/', function(req, res, next) {
 
 
 io.on('connection', function(socket){
+    console.log("Client connected Chat");
 
     socket.on('new message',function(msg){
         console.log("message: " + msg.msg);
@@ -44,6 +45,28 @@ io.on('connection', function(socket){
             });
         io.emit('new bitmap', msg);
 
+    });
+
+    socket.on('new mutation',function(msg){
+        console.log("Received");
+        io.emit('new mutation', msg);
+    });
+
+    socket.on('add task',function(msg){
+        console.log("Received tasks");
+        sessions.update(
+            {_id: msg.session},
+            {$push: {tasks : msg}},
+            { safe: true },
+            function(err, session){
+                if(err) {
+                    console.log(err);
+                }else
+                {
+                    //msg is a json object
+                    io.emit('new task', msg);
+                }
+            });
     });
 });
 server.listen(8000);

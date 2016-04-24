@@ -120,8 +120,14 @@ router.get('/whiteboard/:sessionid',function(req,res) {
 
 /* GET the tasks of the session*/
 /**
- *
+ * Returns a json containing the current string object stored for the tasks stored in the database.
+ * Sends the json in the form:
+ * {
+ *     tasks: [tasks]
+ * }
+ * else it will return status:failure
  */
+
 router.get('/tasks/:sessionid',function(req,res) {
     sessions.findById(req.params.sessionid, function(err,session){
         if(err)
@@ -134,6 +140,27 @@ router.get('/tasks/:sessionid',function(req,res) {
     })
 });
 
+/* GET the chat history of the session*/
+/**
+ * Returns a json containing the current string object stored for the document in the database.
+ * Sends the json in the form:
+ * {
+ *     chat: [messages]
+ * }
+ * else it will return status:failure
+ */
+
+router.get('/chat/:sessionid',function(req,res) {
+    sessions.findById(req.params.sessionid, function(err,session){
+        if(err)
+        {
+            console.log(err);
+            res.status(500).json({status:'failure'});
+        }else{
+            res.json({messages:session.messages});
+        }
+    })
+});
 
 /* POST a session into the db. */
 /**
