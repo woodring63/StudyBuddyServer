@@ -47,6 +47,19 @@ io.on('connection', function(socket){
 
     });
 
+    socket.on('new text',function(msg){
+        console.log("message: " + msg);
+        sessions.update(
+            {_id: msg.sessionID},
+            {document: msg.text},
+            {safe:true},
+            function(err,message){
+                if(err){
+                    console.log(err);
+                }
+            });
+    });
+
     socket.on('new mutation',function(msg){
         console.log("Received");
         io.emit('new mutation', msg);
