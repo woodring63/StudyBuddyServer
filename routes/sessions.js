@@ -203,6 +203,11 @@ router.post('/newsession', function(req, res) {
                         console.log(err);
                         res.status(500).json({status: 'failure'});
                     } else {
+                        if(!user)
+                        {
+                            res.status(500).json({status: 'failure'});
+                            return;
+                        }
                         user.sessions.push(session._id)
                         user.save(function(err)
                         {
