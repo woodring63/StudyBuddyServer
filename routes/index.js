@@ -48,7 +48,7 @@ io.on('connection', function(socket){
     });
 
     socket.on('new text',function(msg){
-        console.log("message: " + msg);
+        console.log("message: " + msg.text);
         sessions.update(
             {_id: msg.sessionID},
             {document: msg.text},
@@ -61,7 +61,7 @@ io.on('connection', function(socket){
     });
 
     socket.on('new mutation',function(msg){
-        console.log("Received");
+        console.log("Received: "+msg.text);
         io.emit('new mutation', msg);
     });
 
