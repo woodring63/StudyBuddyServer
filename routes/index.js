@@ -68,6 +68,54 @@ io.on('connection', function(socket){
                 }
             });
     });
+
+    socket.on('update task',function(msg){
+        console.log("Updated tasks");
+        sessions.findOne(
+            {_id: msg.session},
+            function(err, session){
+                if(err) {
+                    console.log(err);
+                }else
+                {
+                    //msg is a json object
+                    console.log(session.tasks);
+                    for(var i = 0; i < session.tasks.length; i ++)
+                    {
+                        if(session.tasks[i].startTime == msg.startTime)
+                        {
+                            session.tasks[i].completed = msg.completed;
+                            console.log(session.tasks[i]);
+                        }
+                    }
+                    session.save();
+                }
+            });
+        io.emit('update task', msg);
+    });
+
+    socket.on('remove task',function(msg){
+        console.log("Removed Tasks");
+        sessions.findOne(
+            {_id: msg.session},
+            function(err, session){
+                if(err) {
+                    console.log(err);
+                }else
+                {
+                    //msg is a json object
+
+                    session.tasks.forEach(function(task){
+                        if(task.startTime == msg.startTime)
+                        {
+                            session.tasks.pull(task);
+                        }
+                    });
+                    session.save();
+                }
+            });
+        //io.emit('remove task', msg);
+    });
 });
 server.listen(8000);
 
